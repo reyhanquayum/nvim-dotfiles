@@ -43,12 +43,40 @@ autocmd("FileType", {
   end,
 })
 
--- Auto-save for writing files (super helpful for essays!)
-autocmd({ "TextChanged", "TextChangedI" }, {
+-- Auto-save for writing files (helpful for essays)
+autocmd({ "InsertLeave" }, {
   pattern = { "*.typ", "*.md", "*.tex", "*.txt" },
   callback = function()
     if vim.bo.modified and not vim.bo.readonly and vim.fn.expand("%") ~= "" then
       vim.cmd("silent! write")
+    end
+  end,
+})
+
+
+-- autocmd("BufWritePost", {
+--   pattern = "*.typ",
+--   callback = function()
+--     vim.cmd("silent! make")
+--     vim.cmd("cwindow")
+--   end,
+-- })
+
+local undo_augroup = vim.api.nvim_create_augroup("SaneUndo", { clear = true })
+
+vim.api.nvim_create_autocmd("InsertEnter", {
+  group = undo_augroup,
+  pattern = "*",
+  callback = function()
+    -- Keys that will break the undo sequence
+    local keymaps = { ".", ",", "!", "?", ";", ":" }
+    
+    for _, key in ipairs(keymaps) do
+      vim.keymap.set("i", key, key .. "<C-g>u", {
+        silent = true,
+        buffer = true,
+        desc = "Break undo sequence"
+      })
     end
   end,
 })
