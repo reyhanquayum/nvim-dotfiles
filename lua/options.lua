@@ -7,3 +7,4 @@ local o = vim.o
 o.number = true
 o.relativenumber = true
 o.termbidi = true
+-- above is for bidiretional text but is kinda buggy

@@ -44,7 +44,7 @@ return {
         ["<Tab>"] = { "select_next", "fallback" },
         ["<S-Tab>"] = { "select_prev", "fallback" },
         ["<C-e>"] = { "cancel" },
-      }
+      },
     }
   },
   

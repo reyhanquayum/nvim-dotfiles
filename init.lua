@@ -12,7 +12,11 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local lazy_config = require "configs.lazy"
-
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  callback = function()
+    vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.INFO)
+  end,
+})
 -- load plugins
 require("lazy").setup({
   {

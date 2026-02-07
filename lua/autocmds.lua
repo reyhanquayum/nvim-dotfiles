@@ -37,7 +37,7 @@ autocmd("FileType", {
     vim.opt_local.linebreak = true
     vim.opt_local.breakindent = true
     vim.opt_local.spell = true
-    vim.opt_local.textwidth = vim.fn.winwidth(0) - 5
+    vim.opt_local.textwidth = 0
     vim.opt_local.formatoptions:append("t") -- auto wrap text
     vim.opt_local.conceallevel = 2
   end,
@@ -78,5 +78,13 @@ vim.api.nvim_create_autocmd("InsertEnter", {
         desc = "Break undo sequence"
       })
     end
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function()
+    vim.opt_local.makeprg = "python3 %"
+    vim.opt_local.errorformat = "%f:%l:%m"
   end,
 })
