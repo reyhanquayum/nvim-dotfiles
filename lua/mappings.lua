@@ -53,3 +53,7 @@ end, { desc = "Toggle diagnostic virtual text" })
 map("n", "<leader>sr", function()
   require("telescope.builtin").lsp_references()
 end, { desc = "LSP References (Telescope)" })
+
+map("n", "<leader>fm", function()
+  require("conform").format({ timeout_ms = 500, lsp_fallback = true })
+end, { desc = "Format buffer" })
