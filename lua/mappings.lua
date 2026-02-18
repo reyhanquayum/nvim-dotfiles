@@ -57,3 +57,4 @@ end, { desc = "LSP References (Telescope)" })
 map("n", "<leader>fm", function()
   require("conform").format({ timeout_ms = 500, lsp_fallback = true })
 end, { desc = "Format buffer" })
+
