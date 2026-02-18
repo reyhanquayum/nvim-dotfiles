@@ -65,10 +65,6 @@ autocmd({ "InsertLeave" }, {
 -- DevDocs buffer enhancements
 local devdocs_dir = vim.fn.stdpath('data') .. '/devdocs/docs'
 
-local function decode_entities(s)
-  return s:gsub('&lt;', '<'):gsub('&gt;', '>'):gsub('&amp;', '&'):gsub('&quot;', '"'):gsub('&#39;', "'")
-end
-
 local function clean_devdocs_links(bufnr)
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
   local content = table.concat(lines, "\n")
@@ -83,46 +79,20 @@ local function clean_devdocs_links(bufnr)
   -- <a href="URL">TEXT</a>  →  [TEXT](URL)
   content = content:gsub('<a href="([^"]*)"[^>]*>([^<]*)</a>', '[%2](%1)')
 
-  -- cppreference: function declaration tables
-  content = content:gsub('<table class="t%-dcl%-begin">[%s%S]-</table>', function(tbl)
-    local parts = {}
-    local header = tbl:match('Defined in header%s*<code>([^<]*)</code>')
-    if header then
-      table.insert(parts, '_Defined in header `' .. decode_entities(header) .. '`_')
-    end
-    for lang, code in tbl:gmatch('<pre[^>]*data%-language="([^"]*)"[^>]*>%s*<code>([%s%S]-)</code>%s*</pre>') do
-      table.insert(parts, '```' .. lang .. '\n' .. decode_entities(code) .. '\n```')
-    end
-    return table.concat(parts, '\n\n')
-  end)
-
-  -- cppreference: "See also" tables
-  content = content:gsub('<table class="t%-dsc%-begin">[%s%S]-</table>', function(tbl)
-    local rows = {}
-    for row in tbl:gmatch('<tr class="t%-dsc">([%s%S]-)</tr>') do
-      local tds = {}
-      for td in row:gmatch('<td[^>]*>([%s%S]-)</td>') do
-        td = td:gsub('<br ?/?>', ' ')
-        td = td:gsub('<code>([^<]*)</code>', '`%1`')
-        td = td:gsub('<[^>]+>', '')
-        td = decode_entities(td):gsub('%s+', ' '):gsub('^%s*(.-)%s*$', '%1')
-        if td ~= '' then table.insert(tds, td) end
-      end
-      if #tds >= 2 then
-        table.insert(rows, '- ' .. tds[1] .. ' — ' .. tds[2])
-      elseif #tds == 1 then
-        table.insert(rows, '- ' .. tds[1])
-      end
-    end
-    if #rows == 0 then return '' end
-    return '\n**See also**\n\n' .. table.concat(rows, '\n')
-  end)
-
-  -- Decode remaining entities and strip leftover HTML tags
-  content = decode_entities(content):gsub('<[^>]+>', '')
-
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(content, "\n", { plain = true }))
   vim.bo[bufnr].modified = false
+end
+
+local function open_devdocs_in_browser()
+  local bufname = vim.api.nvim_buf_get_name(0)
+  -- Extract the part after /devdocs/docs/ → e.g. python~3.14/library/heapq.md
+  local rel = bufname:match('/devdocs/docs/(.+)%.md$')
+  if not rel then
+    vim.notify('Not a devdocs buffer', vim.log.levels.WARN)
+    return
+  end
+  local url = 'https://devdocs.io/' .. rel
+  vim.fn.jobstart({ 'xdg-open', url }, { detach = true })
 end
 
 local function follow_devdocs_link()
@@ -168,6 +138,7 @@ autocmd('BufReadPost', {
   callback = function(ev)
     clean_devdocs_links(ev.buf)
     vim.keymap.set('n', 'gf', follow_devdocs_link, { buffer = ev.buf, desc = 'Follow DevDocs link' })
+    vim.keymap.set('n', 'gx', open_devdocs_in_browser, { buffer = ev.buf, desc = 'Open in devdocs.io' })
   end,
 })
 
