@@ -168,3 +168,17 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.errorformat = "%f:%l:%m"
   end,
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "c", "cpp" },
+  callback = function()
+    local has_makefile = vim.fn.filereadable("Makefile") == 1 or vim.fn.filereadable("makefile") == 1
+    vim.opt_local.makeprg = has_makefile and "make" or "gcc -Wall -Wextra -g % -o %<"
+    vim.opt_local.errorformat = "%f:%l:%c: %t%*[^:]: %m,%f:%l: %m"
+    vim.keymap.set("n", "<leader>mk", "<cmd>make<CR><cmd>cwindow<CR>", { buffer = true, desc = "Make / compile" })
+    vim.keymap.set("n", "<leader>mr", function()
+      vim.cmd("botright split | terminal ./" .. vim.fn.expand("%<"))
+      vim.bo.bufhidden = "wipe"
+    end, { buffer = true, desc = "Run compiled binary" })
+  end,
+})
