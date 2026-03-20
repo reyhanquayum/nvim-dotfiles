@@ -11,6 +11,20 @@ map("i", "jk", "<ESC>")
 
 map("n", "<leader>tp", ":TypstPreview<CR>", { desc = "Typst Preview" })
 
+map("n", "<leader>gh", function()
+-- TODO: error handling maybe?
+-- 1. get remote url git remote get-url origin
+-- 2. strip .git suffix
+-- open with xdg open
+  local url = vim.fn.system("git remote get-url origin")
+  url = vim.fn.trim(url)
+  url = url:gsub("git@", "https://")
+  url = url:gsub("github.com:", "github.com/")
+  url = url:gsub("%.git$", "")
+  vim.fn.system("xdg-open " .. url)
+
+end, { desc = "Open GitHub repo" })
+
 -- This function safely stops LSP clients on any Neovim version
 local function stop_lsp()
   local msg = "No active LSP clients for this buffer."
