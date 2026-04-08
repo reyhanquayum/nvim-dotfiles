@@ -210,5 +210,29 @@ vim.api.nvim_create_autocmd("FileType", {
       vim.cmd("botright split | terminal ./" .. exe)
       vim.bo.bufhidden = "wipe"
     end, { buffer = true, desc = "Run compiled binary" })
+
+    vim.keymap.set("n", "<leader>gc", function()
+      if has_makefile then
+        vim.notify("makeprg is 'make' (Makefile present), toggle has no effect", vim.log.levels.WARN)
+        return
+      end
+      local mp = vim.opt_local.makeprg:get()
+      -- check longer names first so "clang++" isn't partially matched by "g++"
+      local swaps = {
+        { "clang++", "g++" },
+        { "g++",     "clang++" },
+        { "clang",   "gcc" },
+        { "gcc",     "clang" },
+      }
+      for _, pair in ipairs(swaps) do
+        local old, new = pair[1], pair[2]
+        if mp:find(old, 1, true) then
+          mp = mp:gsub(old:gsub("%+", "%%+"), new, 1)
+          vim.opt_local.makeprg = mp
+          vim.notify("Compiler: " .. new, vim.log.levels.INFO)
+          return
+        end
+      end
+    end, { buffer = true, desc = "Toggle gcc/clang compiler" })
   end,
 })
