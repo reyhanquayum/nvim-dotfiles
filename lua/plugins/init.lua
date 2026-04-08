@@ -39,11 +39,15 @@ return {
     opts = {
       keymap = {
         preset = "default",
-        ["<CR>"] = {}, -- Disable Enter for completion
-        ["<C-y>"] = { "accept" }, -- Accept with Ctrl+Y
+        ["<CR>"] = { "accept", "fallback" }, -- Accept if selected, else newline
         ["<Tab>"] = { "select_next", "fallback" },
         ["<S-Tab>"] = { "select_prev", "fallback" },
         ["<C-e>"] = { "cancel" },
+      },
+      completion = {
+        list = {
+          selection = { preselect = false, auto_insert = false },
+        },
       },
     }
   },

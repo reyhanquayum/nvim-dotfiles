@@ -142,6 +142,14 @@ autocmd('BufReadPost', {
   end,
 })
 
+-- Don't auto-continue comments on new lines
+autocmd("FileType", {
+  pattern = "*",
+  callback = function()
+    vim.opt_local.formatoptions:remove({ "r", "o" })
+  end,
+})
+
 local undo_augroup = vim.api.nvim_create_augroup("SaneUndo", { clear = true })
 
 vim.api.nvim_create_autocmd("InsertEnter", {
@@ -172,12 +180,34 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "c", "cpp" },
   callback = function()
+    local ft = vim.bo.filetype
     local has_makefile = vim.fn.filereadable("Makefile") == 1 or vim.fn.filereadable("makefile") == 1
-    vim.opt_local.makeprg = has_makefile and "make" or "gcc -Wall -Wextra -g % -o %<"
-    vim.opt_local.errorformat = "%f:%l:%c: %t%*[^:]: %m,%f:%l: %m"
-    vim.keymap.set("n", "<leader>mk", "<cmd>make<CR><cmd>cwindow<CR>", { buffer = true, desc = "Make / compile" })
+
+    if has_makefile then
+      vim.opt_local.makeprg = "make"
+    else
+      if ft == "c" then
+        -- C files
+        vim.opt_local.makeprg = "gcc -Wall -Wextra -g -std=c17 % -o %<"
+      else
+        -- C++ files default to g++
+        vim.opt_local.makeprg = "g++ -Wall -Wextra -g -std=c++20 % -o %<"
+      end
+    end
+
+    -- good enough errorformat for both gcc/g++ and clang/clang++
+    vim.opt_local.errorformat =
+      "%f:%l:%c: %t%*[^:]: %m," ..  -- gcc 
+      "%f:%l: %m," ..               -- simpler 
+      "%f:%l:%c: %m"                -- clang 
+
+    -- keymaps 
+    vim.keymap.set("n", "<leader>mk", "<cmd>make<CR><cmd>cwindow<CR>",
+      { buffer = true, desc = "Make / compile" })
+
     vim.keymap.set("n", "<leader>mr", function()
-      vim.cmd("botright split | terminal ./" .. vim.fn.expand("%<"))
+      local exe = vim.fn.expand("%<")
+      vim.cmd("botright split | terminal ./" .. exe)
       vim.bo.bufhidden = "wipe"
     end, { buffer = true, desc = "Run compiled binary" })
   end,
