@@ -31,6 +31,26 @@ return {
     version = '1.*',
     opts = {}, -- lazy.nvim will implicitly calls `setup {}`
   },
+  {
+      "3rd/image.nvim",
+      ft = { "markdown", "vimwiki" },
+      build = false, -- so that it doesn't build the rock https://github.com/3rd/image.nvim/issues/91#issuecomment-2453430239
+      opts = {
+          backend = "kitty",
+          processor = "magick_cli",
+          integrations = {
+            markdown = {
+              enabled = true,
+              download_remote_images = true,
+              filetypes = { "markdown", "vimwiki" }, -- markdown extensions (ie. quarto) can go here
+            },
+            typst = { enabled = false },
+            asciidoc = { enabled = false },
+            neorg = { enabled = false },
+            syslang = { enabled = false },
+          },
+      },
+  },
   -- test new blink
   { import = "nvchad.blink.lazyspec" },
   -- Override blink-cmp keymaps

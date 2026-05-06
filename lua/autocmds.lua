@@ -26,6 +26,11 @@ autocmd("FileType", {
     vim.opt_local.tabstop = 2
     vim.opt_local.shiftwidth = 2
     vim.opt_local.softtabstop = 2
+
+    -- Auto-continue list markers on Enter/o/O
+    vim.opt_local.formatoptions:append("r") -- after Enter in insert mode
+    vim.opt_local.formatoptions:append("o") -- after o/O in normal mode
+    vim.opt_local.comments = "://,b:+,b:-"   -- recognize //, +, and - as leaders
   end,
 })
 
@@ -142,13 +147,6 @@ autocmd('BufReadPost', {
   end,
 })
 
--- Don't auto-continue comments on new lines
-autocmd("FileType", {
-  pattern = "*",
-  callback = function()
-    vim.opt_local.formatoptions:remove({ "r", "o" })
-  end,
-})
 
 local undo_augroup = vim.api.nvim_create_augroup("SaneUndo", { clear = true })
 

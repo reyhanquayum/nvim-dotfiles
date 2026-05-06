@@ -10,6 +10,9 @@ map("i", "jk", "<ESC>")
 -- map({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
 
 map("n", "<leader>tp", ":TypstPreview<CR>", { desc = "Typst Preview" })
+map("n", "<C-t>", function()
+  require("nvchad.themes").open({ style = "compact" })
+end, {})
 
 map("n", "<leader>gh", function()
 -- TODO: error handling maybe?
@@ -71,4 +74,6 @@ end, { desc = "LSP References (Telescope)" })
 map("n", "<leader>fm", function()
   require("conform").format({ timeout_ms = 500, lsp_fallback = true })
 end, { desc = "Format buffer" })
+
+map("n", "z1", "1z=", { desc = "Apply first spell suggestion" })
 
