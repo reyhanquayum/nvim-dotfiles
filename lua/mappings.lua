@@ -67,6 +67,7 @@ map("n", "<leader>td", function()
   vim.diagnostic.config { virtual_text = not current }
   vim.notify("Diagnostic virtual text: " .. (current and "OFF" or "ON"), vim.log.levels.INFO)
 end, { desc = "Toggle diagnostic virtual text" })
+map("n", "<leader>E", vim.diagnostic.open_float, { desc = "Show diagnostic float" })
 map("n", "<leader>sr", function()
   require("telescope.builtin").lsp_references()
 end, { desc = "LSP References (Telescope)" })
