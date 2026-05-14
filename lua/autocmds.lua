@@ -105,10 +105,10 @@ vim.api.nvim_create_autocmd("FileType", {
     else
       if ft == "c" then
         -- C files
-        vim.opt_local.makeprg = "gcc -Wall -Wextra -g -std=c17 % -o %<"
+        vim.opt_local.makeprg = "gcc -Wall -Wextra -g -std=c20 %:p -o %:p:r"
       else
         -- C++ files default to g++
-        vim.opt_local.makeprg = "g++ -Wall -Wextra -g -std=c++20 % -o %<"
+        vim.opt_local.makeprg = "g++ -Wall -Wextra -g -std=c++20 %:p -o %:p:r"
       end
     end
 
@@ -123,8 +123,12 @@ vim.api.nvim_create_autocmd("FileType", {
       { buffer = true, desc = "Make / compile" })
 
     vim.keymap.set("n", "<leader>mr", function()
-      local exe = vim.fn.expand("%<")
-      vim.cmd("botright split | terminal ./" .. exe)
+      local exe = vim.fn.expand("%:p:r")
+      if vim.fn.executable(exe) == 0 then
+        vim.notify("Binary not found or not executable: " .. exe, vim.log.levels.ERROR)
+        return
+      end
+      vim.cmd("botright split | terminal " .. vim.fn.shellescape(exe))
       vim.bo.bufhidden = "wipe"
     end, { buffer = true, desc = "Run compiled binary" })
 
